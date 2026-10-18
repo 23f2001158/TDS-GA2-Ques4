@@ -15,7 +15,7 @@ ISSUER = "https://idp.exam.local"
 AUDIENCE = "tds-p1ljwil9.apps.exam.local"
 
 PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
-PASTE_YOUR_COMPLETE_ASSIGNED_PUBLIC_KEY_HERE
+PASTE_THE_COMPLETE_ASSIGNED_PUBLIC_KEY_HERE
 -----END PUBLIC KEY-----"""
 
 
@@ -32,9 +32,7 @@ def verify_token(request: TokenRequest):
             algorithms=["RS256"],
             issuer=ISSUER,
             audience=AUDIENCE,
-            options={
-                "require": ["exp", "iss", "aud", "sub"],
-            },
+            options={"require": ["exp", "iss", "aud", "sub"]},
         )
 
         return {
@@ -44,18 +42,10 @@ def verify_token(request: TokenRequest):
             "aud": claims.get("aud"),
         }
 
-    except jwt.ExpiredSignatureError:
-        logger.warning("Token expired")
-    except jwt.InvalidAudienceError:
-        logger.warning("Audience mismatch")
-    except jwt.InvalidIssuerError:
-        logger.warning("Issuer mismatch")
-    except jwt.InvalidSignatureError:
-        logger.warning("Signature mismatch: check the public key")
     except jwt.PyJWTError as exc:
         logger.warning("JWT verification failed: %s", exc)
 
-    return JSONResponse(
-        status_code=401,
-        content={"valid": False},
-    )
+        return JSONResponse(
+            status_code=401,
+            content={"valid": False},
+        )
